@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="BedrockMiner:ServerJar">
-    <output-path>$PROJECT_DIR$/../../Minecraft/Servers/Polish Server with BuildTools/BuildTools/plugins</output-path>
+  <artifact type="jar" build-on-make="true" name="BedrockMiner:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/BedrockMiner_jar</output-path>
     <root id="archive" name="BedrockMiner.jar">
       <element id="module-output" name="BedrockMiner" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../Dependencies/spigot-api-1.16.1-R0.1-20200705.225421-92.jar" path-in-jar="/" />

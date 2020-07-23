@@ -8,6 +8,7 @@ import com.adrianwowk.bedrockminer.commands.BMTabCompleter;
 import com.adrianwowk.bedrockminer.commands.CommandHandler;
 import com.adrianwowk.bedrockminer.events.BedrockMinerEvents;
 import org.bukkit.*;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.block.Block;
@@ -31,6 +32,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class BedrockMiner extends JavaPlugin
 {
+    FileConfiguration config = getConfig();
     Server server;
     ConsoleCommandSender console;
     public static String prefix;
@@ -38,14 +40,31 @@ public class BedrockMiner extends JavaPlugin
     public static ItemStack bedrock;
     public static ShapedRecipe bedrockpickaxeRecipe;
     public static ShapedRecipe bedrockRecipe;
+    public static boolean breakBottom;
+    public static boolean silkTouch;
+    public static int durability;
 
     public BedrockMiner() {
         this.server = Bukkit.getServer();
         this.console = this.server.getConsoleSender();
-        this.prefix = ChatColor.GRAY + "[" + ChatColor.RED + "BedrockMiner" + ChatColor.GRAY + "] ";
+        prefix = ChatColor.GRAY + "[" + ChatColor.RED + "BedrockMiner" + ChatColor.GRAY + "] ";
     }
 
     public void onEnable() {
+        config.addDefault("breakbottom", true);
+        config.options().copyDefaults(true);
+
+        config.addDefault("silktouch", true);
+        config.options().copyDefaults(true);
+
+        config.addDefault("durability", 10);
+        config.options().copyDefaults(true);
+        saveConfig();
+
+        breakBottom = config.getBoolean("breakbottom");
+        silkTouch = config.getBoolean("silktouch");
+        durability = config.getInt("durability");
+
         // Initialize Bedrock Pickaxe Item
         initPickaxe();
 

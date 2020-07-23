@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -23,12 +24,12 @@ public class BedrockMinerEvents implements Listener {
         }
         if (event.getAction().equals((Object) Action.LEFT_CLICK_BLOCK)) {
             final Player player = event.getPlayer();
-            ItemStack inHand = player.getItemInHand();
+            ItemStack inHand = player.getInventory().getItemInMainHand();
             if (player.hasPermission("bedrockminer.use")
-                    && inHand.getType() == Material.NETHERITE_PICKAXE
-                    && inHand.getItemMeta().hasEnchant(Enchantment.VANISHING_CURSE)
-                    && inHand.getItemMeta().hasLore()) {
+                    && inHand.isSimilar(BedrockMiner.bedrockpickaxe)) {
                 final Block block = event.getClickedBlock();
+                if (block.getY() == 1 && !BedrockMiner.breakBottom)
+                    return;
                 final BlockBreakEvent breakEvent = new BlockBreakEvent(block, player);
                 Bukkit.getServer().getPluginManager().callEvent((Event)breakEvent);
                 if (breakEvent.isCancelled()) {
@@ -38,19 +39,19 @@ public class BedrockMinerEvents implements Listener {
                     block.breakNaturally();
                     block.setType(Material.AIR);
                     player.playSound(player.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, SoundCategory.PLAYERS, 1.0f, 1.0f);
-                    if (player.getItemInHand().getEnchantments().containsKey(Enchantment.SILK_TOUCH)){
+                    if (player.getItemInHand().getEnchantments().containsKey(Enchantment.SILK_TOUCH) && BedrockMiner.silkTouch){
                         ItemStack item = new ItemStack(Material.BEDROCK, 1);
                         player.getInventory().addItem(item);
                     }
-                    final ItemStack newItem = player.getItemInHand();
-                    final Short durability = (short)(newItem.getDurability() + 10);
+                    final ItemStack newItem = player.getInventory().getItemInMainHand();
+                    final Short durability = (short)(newItem.getDurability() + BedrockMiner.durability);
                     newItem.setDurability((short)durability);
                     //this.getServer().getLogger().info(durability.toString());
                     if (durability >= newItem.getType().getMaxDurability()) {
-                        player.setItemInHand(new ItemStack(Material.AIR));
+                        player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
                         return;
                     }
-                    player.setItemInHand(newItem);
+                    player.getInventory().setItemInMainHand(newItem);
                 } else {
                     event.setCancelled(true);
                     player.sendMessage(BedrockMiner.prefix + ChatColor.YELLOW + "Warning! You can only break "
@@ -102,5 +103,14 @@ public class BedrockMinerEvents implements Listener {
             }
         }
         return;
+    }
+
+    @EventHandler
+    public void onBlockPlace(final BlockPlaceEvent event){
+        if (event.getBlockPlaced().getType() == Material.BEDROCK){
+            if (!event.getPlayer().hasPermission("bedrockminer.place")){
+                event.setCancelled(true);
+            }
+        }
     }
 }
