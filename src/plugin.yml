@@ -11,6 +11,9 @@ permissions:
   bedrockminer.use:
     description: Allows use of bedrock pickaxe
     default: op
+  bedrockminer.place:
+    description: Allows placing of bedrock
+    default: op
   bedrockminer.give:
     description: Allows use of /bm give command
     default: op
