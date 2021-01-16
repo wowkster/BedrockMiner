@@ -3,6 +3,7 @@ package com.adrianwowk.bedrockminer;
 import com.adrianwowk.bedrockminer.commands.BMTabCompleter;
 import com.adrianwowk.bedrockminer.commands.CommandHandler;
 import com.adrianwowk.bedrockminer.events.BedrockMinerEvents;
+import com.adrianwowk.bedrockminer.utils.Metrics;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -55,6 +56,9 @@ public class BedrockMiner extends JavaPlugin
 
         // Register Event Listeners
         Bukkit.getServer().getPluginManager().registerEvents(new BedrockMinerEvents(this), this);
+
+        // Enable Plugin Metrics with bStats
+        Metrics metrics = new Metrics(this, 	10029);
 
         // Server Console Message
         console.sendMessage(getPrefix() + "Successfully enabled :)");
