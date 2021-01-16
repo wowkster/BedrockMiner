@@ -9,33 +9,33 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class CommandHandler implements CommandExecutor {
+
+    private BedrockMiner instance;
+
+    public CommandHandler(BedrockMiner plugin){
+        this.instance = plugin;
+    }
+
     public boolean onCommand(final CommandSender sender, final Command cmd, final String label, final String[] args) {
         if (sender instanceof Player) {
-            try {
                 playerGiveCommand((Player)sender, cmd, args);
-            }
-            catch (InstantiationException | IllegalAccessException ex2) {
-                final ReflectiveOperationException ex = null;
-                final ReflectiveOperationException e = ex;
-                e.printStackTrace();
-            }
         }
         else {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "You must be a player to utilize these commands!");
+            Bukkit.getConsoleSender().sendMessage(instance.translate("messages.no-permission.command.console") );
         }
         return true;
     }
-    public boolean playerGiveCommand(final Player p, final Command cmd, final String[] args) throws InstantiationException, IllegalAccessException {
+    public boolean playerGiveCommand(final Player p, final Command cmd, final String[] args){
         if (cmd.getName().equalsIgnoreCase("bedrockminer")) {
             if (args[0].equalsIgnoreCase("give")) {
-                if (p.hasPermission("bedrockminer.give") || p.isOp()){
-                    p.getInventory().addItem(BedrockMiner.bedrockpickaxe);
+                if (p.hasPermission("bedrockminer.give")){
+                    p.getInventory().addItem(instance.bedrockpickaxe);
                 }
                 else {
-                    p.sendMessage(BedrockMiner.prefix + ChatColor.YELLOW + "You do not have permission to use that command.");
+                    p.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.give"));
                 }
             } else{
-                p.sendMessage(BedrockMiner.prefix + ChatColor.YELLOW + "That command is invalid.");
+                p.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.invalid"));
             }
 
         }

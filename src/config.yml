@@ -1,0 +1,19 @@
+messages:
+  prefix: "&7[&bBedrockMiner&7] &e"
+  not-bedrock: "&eWarning! You can only break &6Bedrock &eusing this pickaxe"
+  no-permission:
+    craft:
+      pickaxe: "&cYou do not have permission to craft a &6Bedrock Pickaxe&e."
+      bedrock: "&cYou do not have permission to craft &6Bedrock&e."
+    use:
+      pickaxe: "&cYou do not have permission to use a &6Bedrock Pickaxe&e."
+      bedrock: "&cYou do not have permission to place &6Bedrock&e."
+    command:
+      give: "&eYou do not have permission to use that command."
+      console: "&cYou must be a player to utilize these commands!"
+      invalid: "&cThat command is invalid."
+    breakbottom: "&eYou can not break the bottom bedrock block."
+
+breakbottom: true
+silktouch: true
+durability: 10
