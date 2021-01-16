@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="TestServer">
-    <output-path>$PROJECT_DIR$/../Server/plugins</output-path>
-    <root id="archive" name="BedrockMiner-v1.4.jar">
-      <element id="module-output" name="BedrockMiner" />
-    </root>
-  </artifact>
-</component>

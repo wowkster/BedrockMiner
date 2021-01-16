@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="BedrockMiner:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/BedrockMiner_jar</output-path>
-    <root id="archive" name="BedrockMiner-v1.4.jar">
-      <element id="module-output" name="BedrockMiner" />
-    </root>
-  </artifact>
-</component>
