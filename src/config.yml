@@ -14,6 +14,9 @@ messages:
       invalid: "&cThat command is invalid."
     breakbottom: "&eYou can not break the bottom bedrock block."
 
+#If disabled, disallows players to break the bottom bedrock block (Y=0)
 breakbottom: true
+#If enabled, drops bedrock blocks if the pickaxe used if enchanted with silk touch
 silktouch: true
+#The amount of durability to remove from the pickaxe on each usage
 durability: 10

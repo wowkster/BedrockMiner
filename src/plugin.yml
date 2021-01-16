@@ -1,5 +1,5 @@
 name: BedrockMiner
-version: 1.4
+version: 1.4.1
 main: com.adrianwowk.bedrockminer.BedrockMiner
 author: Adrian Wowk
 commands:
