@@ -11,7 +11,7 @@ messages:
     command:
       give: "&eYou do not have permission to use that command."
       console: "&cYou must be a player to utilize these commands!"
-      invalid: "&cThat command is invalid."
+      invalid: "&cThat command is invalid. Usage: /bedrockminer give"
     breakbottom: "&eYou can not break the bottom bedrock block."
 
 #If disabled, disallows players to break the bottom bedrock block (Y=0)

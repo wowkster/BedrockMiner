@@ -27,17 +27,20 @@ public class CommandHandler implements CommandExecutor {
     }
     public boolean playerGiveCommand(final Player p, final Command cmd, final String[] args){
         if (cmd.getName().equalsIgnoreCase("bedrockminer")) {
-            if (args[0].equalsIgnoreCase("give")) {
-                if (p.hasPermission("bedrockminer.give")){
-                    p.getInventory().addItem(instance.bedrockpickaxe);
-                }
-                else {
-                    p.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.give"));
-                }
-            } else{
+            if (args.length == 0){
                 p.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.invalid"));
+            } else {
+                if (args[0].equalsIgnoreCase("give")) {
+                    if (p.hasPermission("bedrockminer.give")) {
+                        p.getInventory().addItem(instance.bedrockpickaxe);
+                    } else {
+                        p.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.give"));
+                    }
+                } else {
+                    p.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.invalid"));
+                }
             }
-
+            return true;
         }
         return false;
     }
