@@ -101,6 +101,7 @@ public class BedrockPickaxe implements Listener {
         newItem.setDurability(durability);
         if (durability >= newItem.getType().getMaxDurability()) {
             player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+            player.playSound(player.getLocation(), Sound.ITEM_SHIELD_BREAK, 1f, 1f);
             return;
         }
         player.getInventory().setItemInMainHand(newItem);
