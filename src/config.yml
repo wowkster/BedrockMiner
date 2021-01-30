@@ -42,7 +42,7 @@ silk-touch: true
 silk-touch-level: 1
 
 #The amount of durability to remove from the pickaxe on each usage
-durability: 10
+durability: 100
 
 # List of disabled layers
 disabled-layers:
