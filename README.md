@@ -3,7 +3,7 @@ A minecraft plugin that adds craftable bedrock, as well as a craftable bedrock p
 
 https://www.spigotmc.org/resources/bedrockminer.81335/
 
-##Config
+## Config
 
 ```yaml
 messages:
