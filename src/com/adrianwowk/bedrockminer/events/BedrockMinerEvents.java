@@ -11,11 +11,14 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 
-import java.util.Objects;
+import java.util.*;
 
 public class BedrockMinerEvents implements Listener {
 
@@ -26,124 +29,126 @@ public class BedrockMinerEvents implements Listener {
     }
 
     @EventHandler
-    public void playerJoin(final PlayerJoinEvent event){
+    public void playerJoin(final PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if (!player.hasDiscoveredRecipe(instance.bedrockKey))
-            player.discoverRecipe(instance.bedrockKey);
-        if (!player.hasDiscoveredRecipe(instance.bedrockpickaxeKey))
-            player.discoverRecipe(instance.bedrockpickaxeKey);
+        if (!player.hasDiscoveredRecipe(new NamespacedKey(instance, "bedrock")))
+            player.discoverRecipe(new NamespacedKey(instance, "bedrock"));
+        if (!player.hasDiscoveredRecipe(new NamespacedKey(instance, "bedrock_pickaxe")))
+            player.discoverRecipe(new NamespacedKey(instance, "bedrock_pickaxe"));
     }
 
     @EventHandler
-    public void onLeftClick(final PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        ItemStack inHand = event.getItem();
+    public void anvilShit(PrepareAnvilEvent event){
+        ItemStack baseMaterial = event.getInventory().getItem(0);
+        ItemStack upgradeMaterial = event.getInventory().getItem(1);
+        ItemStack result = event.getResult();
 
-        if (inHand == null || inHand.getType() == Material.AIR)
+        if (baseMaterial == null
+//                || upgradeMaterial == null
+                || result == null
+                || !result.hasItemMeta()
+                || !result.getItemMeta().hasCustomModelData()
+                || result.getItemMeta().getCustomModelData() != instance.config.getInt("pickaxe.custom-model-data"))
             return;
 
-        int modelData;
-        if (!Objects.requireNonNull(inHand.getItemMeta()).hasCustomModelData()){
-            return;
+        boolean allowSilk = instance.config.getBoolean("allow-anvil-silk");
+        boolean allowOther = instance.config.getBoolean("allow-anvil-other");
+        boolean allowRename = instance.config.getBoolean("allow-anvil-rename");
+        boolean allowMerge = instance.config.getBoolean("allow-anvil-merge");
+
+        if (!allowSilk){
+            if (upgradeMaterial != null) {
+                if (upgradeMaterial.containsEnchantment(Enchantment.SILK_TOUCH))
+                    event.setResult(null);
+
+                if (baseMaterial.containsEnchantment(Enchantment.SILK_TOUCH))
+                    event.setResult(null);
+
+                if (upgradeMaterial.getType() == Material.ENCHANTED_BOOK) {
+                    EnchantmentStorageMeta meta = (EnchantmentStorageMeta) upgradeMaterial.getItemMeta();
+                    if (meta.hasStoredEnchant(Enchantment.SILK_TOUCH))
+                        event.setResult(null);
+                }
+            }
         }
 
-        modelData = inHand.getItemMeta().getCustomModelData();
+        if (!allowOther){
+            if (upgradeMaterial != null) {
+                bigConditionStatement(event, hasSilk(upgradeMaterial), hasCurse(upgradeMaterial), enchSize(upgradeMaterial), upgradeMaterial);
 
-        if (!event.getAction().equals(Action.LEFT_CLICK_BLOCK)){
-            return;
-        }
-
-        if (modelData != Objects.requireNonNull(instance.bedrockpickaxe.getItemMeta()).getCustomModelData()){
-            return;
-        }
-
-        if (!player.hasPermission("bedrockminer.use")) {
-            player.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.use.pickaxe"));
-            event.setCancelled(true);
-            return;
+                if (upgradeMaterial.getType() == Material.ENCHANTED_BOOK)
+                    bigConditionStatement(event, hasSilkS(upgradeMaterial), hasCurseS(upgradeMaterial), enchSSize(upgradeMaterial), upgradeMaterial);
+            }
         }
 
-        final Block block = event.getClickedBlock();
-        assert block != null;
-        if (block.getY() == 0 && !instance.getConfig().getBoolean("breakbottom")) {
-            player.sendMessage(instance.getPrefix() + instance.translate("messages.breakbottom"));
-            return;
-        }
+        if (!allowRename)
+            if (baseMaterial.hasItemMeta())
+                if (baseMaterial.getItemMeta().hasDisplayName())
+                    if (!ChatColor.stripColor(event.getInventory().getRenameText()).equals(ChatColor.stripColor(baseMaterial.getItemMeta().getDisplayName())))
+                        event.setResult(null);
 
-        if (block.getType() != Material.BEDROCK) {
-            event.setCancelled(true);
-            player.sendMessage(instance.getPrefix() + instance.translate("messages.not-bedrock"));
-            return;
-        }
-        block.breakNaturally();
-        block.setType(Material.AIR);
-        player.playSound(player.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, SoundCategory.PLAYERS, 1.0f, 1.0f);
-        if (inHand.getEnchantments().containsKey(Enchantment.SILK_TOUCH) && instance.getConfig().getBoolean("silktouch")) {
-            ItemStack item = new ItemStack(Material.BEDROCK);
-            Objects.requireNonNull(player.getLocation().getWorld()).dropItemNaturally(block.getLocation(), item);
-        }
-        ItemStack newItem = player.getInventory().getItemInMainHand();
-        final short durability = (short) (newItem.getDurability() + instance.getConfig().getInt("durability"));
-        newItem.setDurability(durability);
-        if (durability >= newItem.getType().getMaxDurability()) {
-            player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-            return;
-        }
-        player.getInventory().setItemInMainHand(newItem);
+        if (!allowMerge)
+            if (upgradeMaterial != null)
+                if (baseMaterial.getType() == Material.NETHERITE_PICKAXE && upgradeMaterial.getType() == Material.NETHERITE_PICKAXE)
+                    event.setResult(null);
 
     }
 
-    @EventHandler
-    public void onBlockBreak(final BlockBreakEvent event){
-        Player player = event.getPlayer();
-        ItemStack inHand = player.getInventory().getItemInMainHand();
-
-        if (inHand.getType() == Material.AIR)
-            return;
-
-        int modelData;
-        if (!Objects.requireNonNull(inHand.getItemMeta()).hasCustomModelData()){
-            return;
-        }
-
-        modelData = inHand.getItemMeta().getCustomModelData();
-
-        if (modelData != Objects.requireNonNull(instance.bedrockpickaxe.getItemMeta()).getCustomModelData()){
-            return;
-        }
-        event.setCancelled(true);
+    private void bigConditionStatement(PrepareAnvilEvent event, boolean b, boolean b2, int i, ItemStack upgradeMaterial) {
+        if ((b && b2 && i > 2)
+        || (!b && b2 && i > 1)
+        || ( b && !b2 && i > 1)
+        || (!b && !b2 && i > 0))
+            event.setResult(null);
     }
 
     @EventHandler
     public void onCraftAttempt(final CraftItemEvent event) {
-        if (event.isCancelled()) {
+        if (event.isCancelled())
             return;
-        }
         final Player player = (Player) event.getWhoClicked();
-        if (Objects.equals(event.getCurrentItem(), instance.bedrockpickaxe)) {
+        if (event.getCurrentItem().getItemMeta().hasCustomModelData() && event.getCurrentItem().getItemMeta().getCustomModelData() == instance.config.getInt("pickaxe.custom-model-data")) {
             if (!player.hasPermission("bedrockminer.craft.pickaxe")) {
                 event.setCancelled(true);
                 event.setCurrentItem(new ItemStack(Material.AIR));
                 player.updateInventory();
                 player.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.craft.pickaxe"));
             }
-        } else if (Objects.equals(event.getCurrentItem(), instance.bedrock)) {
+        } else if (event.getCurrentItem().getItemMeta().hasCustomModelData() && event.getCurrentItem().getItemMeta().getCustomModelData() == instance.config.getInt("bedrock.custom-model-data")) {
             if (!player.hasPermission("bedrockminer.craft.bedrock")) {
                 event.setCancelled(true);
                 event.setCurrentItem(new ItemStack(Material.AIR));
                 player.updateInventory();
                 player.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.craft.bedrock"));
+                player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
             }
         }
     }
 
-    @EventHandler
-    public void onBlockPlace(final BlockPlaceEvent event) {
-        if (event.getBlockPlaced().getType() == Material.BEDROCK) {
-            if (!event.getPlayer().hasPermission("bedrockminer.place")) {
-                event.getPlayer().sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.use.bedrock"));
-                event.setCancelled(true);
-            }
-        }
+    private int enchSize(ItemStack item){
+        return item.getEnchantments().size();
+    }
+
+    private boolean hasCurse(ItemStack item){
+        return item.containsEnchantment(Enchantment.VANISHING_CURSE);
+    }
+
+    private boolean hasSilk(ItemStack item){
+        return item.containsEnchantment(Enchantment.SILK_TOUCH);
+    }
+
+    private int enchSSize(ItemStack item){
+        EnchantmentStorageMeta meta = (EnchantmentStorageMeta) item.getItemMeta();
+        return meta.getStoredEnchants().size();
+    }
+
+    private boolean hasCurseS(ItemStack item){
+        EnchantmentStorageMeta meta = (EnchantmentStorageMeta) item.getItemMeta();
+        return meta.hasStoredEnchant(Enchantment.VANISHING_CURSE);
+    }
+
+    private boolean hasSilkS(ItemStack item){
+        EnchantmentStorageMeta meta = (EnchantmentStorageMeta) item.getItemMeta();
+        return meta.hasStoredEnchant(Enchantment.SILK_TOUCH);
     }
 }

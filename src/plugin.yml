@@ -1,5 +1,5 @@
 name: BedrockMiner
-version: 1.5.1
+version: 1.5.6
 main: com.adrianwowk.bedrockminer.BedrockMiner
 author: Adrian Wowk
 commands:
@@ -23,12 +23,14 @@ permissions:
   bedrockminer.craft.bedrock:
     description: Allows crafting of bedrock
     default: op
-    bedrockminer.craft:
+  bedrockminer.craft:
       description: Allows crafting of custom items
       default: op
       children:
         bedrockminer.craft.bedrock: true
         bedrockminer.craft.pickaxe: true
+  bedrockminer.reload:
+    default: op
   bedrockminer.*:
     description: Wildcard permission
     default: op
