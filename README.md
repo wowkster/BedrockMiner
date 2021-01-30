@@ -98,5 +98,5 @@ allow-anvil-rename: false
 allow-anvil-merge: false
 ```
 
-##Issues/Requests
+## Issues/Requests
 If you have any issues with the plugin or you would like to request a new feature, create a new issue on this repository or DM me on discord at `Wowkster#0969`
