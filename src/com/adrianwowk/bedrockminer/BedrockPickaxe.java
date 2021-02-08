@@ -12,6 +12,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
@@ -39,16 +40,6 @@ public class BedrockPickaxe implements Listener {
         if (!Objects.requireNonNull(inHand.getItemMeta()).hasCustomModelData())
             return;
 
-        List<String> disabledWorlds = instance.getConfig().getStringList("disabled-worlds");
-
-        World w = player.getWorld();
-        for (String str : disabledWorlds) {
-            if (w.getName().equalsIgnoreCase(str)) {
-                Bukkit.getConsoleSender().sendMessage("§6" + w.getName() + " §dMatches §6" + str);
-                return;
-            }
-        }
-
         modelData = inHand.getItemMeta().getCustomModelData();
 
         if (!event.getAction().equals(Action.LEFT_CLICK_BLOCK))
@@ -73,6 +64,16 @@ public class BedrockPickaxe implements Listener {
         if (block.getType() != Material.BEDROCK)
             return;
 
+        List<String> disabledWorlds = instance.getConfig().getStringList("disabled-worlds");
+
+        World w = player.getWorld();
+        for (String str : disabledWorlds) {
+            if (w.getName().equalsIgnoreCase(str)) {
+                player.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.world"));
+                return;
+            }
+        }
+
         for (Integer layer : disabledLayers)
             if (block.getY() == layer) {
                 player.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.break"));
@@ -88,8 +89,12 @@ public class BedrockPickaxe implements Listener {
             return;
         }
 
-        block.breakNaturally();
-        block.setType(Material.AIR);
+        BlockBreakEvent bbe = new BlockBreakEvent(block, player);
+        Bukkit.getPluginManager().callEvent(bbe);
+        if (bbe.isCancelled())
+            return;
+//        block.breakNaturally();
+//        block.setType(Material.AIR);
         player.playSound(player.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, SoundCategory.PLAYERS, 1.0f, 1.0f);
         if (inHand.getEnchantments().containsKey(Enchantment.SILK_TOUCH) &&
                 inHand.getEnchantmentLevel(Enchantment.SILK_TOUCH) >= instance.getConfig().getInt("silk-touch-level") &&
@@ -134,9 +139,19 @@ public class BedrockPickaxe implements Listener {
 
         if (event.getBlock().getType() != Material.BEDROCK) {
             player.sendMessage(instance.getPrefix() + instance.translate("messages.not-bedrock"));
+            event.setCancelled(true);
+        }
+        else {
+            new BukkitRunnable(){
+
+                public void run() {
+                    if (!event.isCancelled())
+                        event.getBlock().breakNaturally();
+                }
+            }.runTaskLater(instance, 1L);
 
         }
-        event.setCancelled(true);
+
     }
 
     private int getCoolDownTimeRemaining(Player player) {
@@ -165,20 +180,35 @@ public class BedrockPickaxe implements Listener {
         ItemMeta bedrockpickaxeLabel = bedrockpickaxe.getItemMeta();
         assert bedrockpickaxeLabel != null;
         bedrockpickaxeLabel.setDisplayName(instance.translate("pickaxe.name"));
-        for (String str : instance.config.getStringList("pickaxe.enchantments")) {
-            System.out.println(str);
-            bedrockpickaxeLabel.addEnchant(Enchantment.getByKey(NamespacedKey.minecraft(str)), 1, false);
-        }
-        bedrockpickaxeLabel.setLore(instance.config.getStringList("pickaxe.lore"));
+        List<String> lore = new ArrayList<>();
+        for (String line : instance.config.getStringList("pickaxe.lore"))
+            lore.add(ChatColor.translateAlternateColorCodes('&', line));
+        bedrockpickaxeLabel.setLore(lore);
         bedrockpickaxeLabel.setCustomModelData(instance.config.getInt("pickaxe.custom-model-data"));
         bedrockpickaxe.setItemMeta(bedrockpickaxeLabel);
-
+        for (String str : instance.config.getStringList("pickaxe.enchantments")) {
+            String[] parts = str.split(":");
+            if (parts.length == 1)
+                bedrockpickaxe.addUnsafeEnchantment(Enchantment.getByKey(NamespacedKey.minecraft(parts[0])), 1);
+            else if (parts.length > 1){
+                String name = parts[0];
+                int level = 1;
+                try {
+                    level = Integer.parseInt(parts[1]);
+                } catch (NumberFormatException e){
+                    Bukkit.getConsoleSender().sendMessage("Could not parse level from enchant " + name + ". Using default value.");
+                }
+                bedrockpickaxe.addUnsafeEnchantment(Enchantment.getByKey(NamespacedKey.minecraft(name)), level);
+            }
+        }
         if (instance.config.getBoolean("pickaxe-recipe"))
+            Bukkit.removeRecipe(new NamespacedKey(instance, "bedrock_pickaxe"));
             Bukkit.addRecipe(new CustomRecipe("bedrock_pickaxe", "pickaxe-shaped-recipe", bedrockpickaxe, instance).getShapedRecipe());
         return bedrockpickaxe;
     }
 
     public ItemStack getItem(){
+        this.item = initPickaxe();
         return this.item;
     }
 }

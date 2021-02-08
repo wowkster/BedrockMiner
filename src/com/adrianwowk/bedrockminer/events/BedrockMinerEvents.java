@@ -11,7 +11,9 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
@@ -91,7 +93,12 @@ public class BedrockMinerEvents implements Listener {
             if (upgradeMaterial != null)
                 if (baseMaterial.getType() == Material.NETHERITE_PICKAXE && upgradeMaterial.getType() == Material.NETHERITE_PICKAXE)
                     event.setResult(null);
+        ((Player)event.getView().getPlayer()).updateInventory();
+    }
 
+    @EventHandler
+    public void onInvClose(InventoryCloseEvent event){
+        ((Player) event.getPlayer()).updateInventory();
     }
 
     private void bigConditionStatement(PrepareAnvilEvent event, boolean b, boolean b2, int i, ItemStack upgradeMaterial) {
@@ -101,20 +108,51 @@ public class BedrockMinerEvents implements Listener {
         || (!b && !b2 && i > 0))
             event.setResult(null);
     }
+    @EventHandler
+    public void onCraftPrepare(final PrepareItemCraftEvent event) {
+
+        if (!instance.config.getBoolean("require-custom-bedrock"))
+            return;
+
+        if (event.getRecipe() == null || event.getRecipe().getResult() == null)
+            return;
+
+        if (event.getRecipe().getResult().hasItemMeta() && event.getRecipe().getResult().getItemMeta().hasCustomModelData() && event.getRecipe().getResult().getItemMeta().getCustomModelData() == instance.config.getInt("pickaxe.custom-model-data")){
+            for (ItemStack item : event.getInventory().getMatrix()){
+                if (item != null) {
+                    if (item.getType() == Material.BEDROCK && !item.getItemMeta().hasCustomModelData()) {
+                        event.getInventory().setResult(new ItemStack(Material.AIR));
+                        ((Player) event.getView().getPlayer()).updateInventory();
+                    }
+                }
+            }
+        }
+
+    }
 
     @EventHandler
     public void onCraftAttempt(final CraftItemEvent event) {
         if (event.isCancelled())
             return;
         final Player player = (Player) event.getWhoClicked();
-        if (event.getCurrentItem().getItemMeta().hasCustomModelData() && event.getCurrentItem().getItemMeta().getCustomModelData() == instance.config.getInt("pickaxe.custom-model-data")) {
+
+        if (event.getCurrentItem() == null)
+            return;
+
+        if (event.getCurrentItem().hasItemMeta()
+                && event.getCurrentItem().getItemMeta().hasCustomModelData()
+                && event.getCurrentItem().getItemMeta().getCustomModelData()
+                == instance.config.getInt("pickaxe.custom-model-data")) {
             if (!player.hasPermission("bedrockminer.craft.pickaxe")) {
                 event.setCancelled(true);
                 event.setCurrentItem(new ItemStack(Material.AIR));
                 player.updateInventory();
                 player.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.craft.pickaxe"));
             }
-        } else if (event.getCurrentItem().getItemMeta().hasCustomModelData() && event.getCurrentItem().getItemMeta().getCustomModelData() == instance.config.getInt("bedrock.custom-model-data")) {
+        } else if (event.getCurrentItem().hasItemMeta()
+                && event.getCurrentItem().getItemMeta().hasCustomModelData()
+                && event.getCurrentItem().getItemMeta().getCustomModelData()
+                == instance.config.getInt("bedrock.custom-model-data")) {
             if (!player.hasPermission("bedrockminer.craft.bedrock")) {
                 event.setCancelled(true);
                 event.setCurrentItem(new ItemStack(Material.AIR));

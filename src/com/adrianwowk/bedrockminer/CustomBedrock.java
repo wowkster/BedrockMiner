@@ -37,8 +37,10 @@ public class CustomBedrock implements Listener {
 
         bedrock.setItemMeta(bedrockLabel);
 
-        if (instance.config.getBoolean("pickaxe-recipe"))
+        if (instance.config.getBoolean("pickaxe-recipe")) {
+            Bukkit.removeRecipe(new NamespacedKey(instance, "bedrock"));
             Bukkit.addRecipe(new CustomRecipe("bedrock", "bedrock-shaped-recipe", bedrock, instance).getShapedRecipe());
+        }
         return bedrock;
     }
 
@@ -53,6 +55,7 @@ public class CustomBedrock implements Listener {
     }
 
     public ItemStack getItem(){
+        this.item = initBedrock();
         return this.item;
     }
 

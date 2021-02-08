@@ -14,10 +14,11 @@ messages:
       console: "&cYou must be a player to utilize these commands!"
       target-not-found: "&cThe selected target could not be found"
       invalid: "&cThat command is invalid. Usage: /bedrockminer give [target]"
-      to-many-args: "&cCommand passed with excess arguments. Usage: /bedrockminer give [target]"
+      too-many-args: "&cCommand passed with excess arguments. Usage: /bedrockminer give [target]"
     break: "&eYou can not break bedrock blocks at that layer."
     # Setting the cooldown to "" will disable the message. %TICKS% is replaced by the ticks left and %SECONDS% is replaced by the seconds left (rounded up)
-    cooldown: "&dYou need to wait before using that again. Time remaining: %TICKS% ticks (%SECONDS% seconds) ."
+    cooldown: "&dYou need to wait before using that again. Time remaining: %TICKS% ticks (%SECONDS% seconds)."
+    world: "&cBedrock Pickaxes are disabled in this world."
 
 # Customize the pickaxe item meta (changing model data will make any pickaxes currently in circulation to not work)
 pickaxe:
@@ -25,7 +26,7 @@ pickaxe:
   lore:
     - "Can be used to break bedrock"
   enchantments:
-    - vanishing_curse
+    - vanishing_curse:1
   custom-model-data: 6969696
 
 # Customize the bedrock item meta
@@ -35,13 +36,13 @@ bedrock:
     - "Can be used to craft a bedrock pickaxe"
   custom-model-data: 6969697
 
-#If enabled, drops bedrock blocks if the pickaxe used if enchanted with silk touch
+# If enabled, drops bedrock blocks if the pickaxe used if enchanted with silk touch
 silk-touch: true
 
 # Level silk touch required to obtain bedrock
 silk-touch-level: 1
 
-#The amount of durability to remove from the pickaxe on each usage
+# The amount of durability to remove from the pickaxe on each usage
 durability: 100
 
 # List of disabled layers
@@ -71,6 +72,10 @@ bedrock-shaped-recipe:
 # Whether or not to register the pickaxe crafting recipe
 pickaxe-recipe: true
 
+# Forces players to use the custom bedrock item when making the pickaxe.
+# Disable if your recipe doesn't use bedrock or if you have another bedrock source you would prefer.
+require-custom-bedrock: true
+
 # Shaped crafting recipe for crafting bedrock pickaxe
 pickaxe-shaped-recipe:
   - bedrock, bedrock, bedrock
@@ -83,7 +88,7 @@ allow-anvil-silk: true
 # Allow players to add other enchantments through an anvil
 allow-anvil-other: false
 
-# Allow players to rename the pickaxe
+# Allow players to rename the pickaxe (THIS FEATURE IS EXPERIMENTAL AND MAY BREAK)
 allow-anvil-rename: false
 
 # Allow players to merge pickaxe with other pickaxes to try and sneak mending/etc on it, or to prevent repair

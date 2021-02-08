@@ -17,50 +17,46 @@ public class CommandHandler implements CommandExecutor {
     }
 
     public boolean onCommand(final CommandSender sender, final Command cmd, final String label, final String[] args) {
-        if (sender instanceof Player) {
-            playerGiveCommand((Player) sender, cmd, args);
-        } else {
-            Bukkit.getConsoleSender().sendMessage(instance.translate("messages.no-permission.command.console"));
-        }
-        return true;
-    }
 
-    public boolean playerGiveCommand(final Player p, final Command cmd, final String[] args) {
         if (cmd.getName().equalsIgnoreCase("bedrockminer")) {
             if (args.length == 0) {
-                p.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.invalid"));
+                sender.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.invalid"));
             } else if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("give")) {
-                    if (p.hasPermission("bedrockminer.give"))
-                        p.getInventory().addItem(instance.getPickaxe().getItem());
+                    if (sender.hasPermission("bedrockminer.give"))
+                        if (sender instanceof Player)
+                            ((Player)sender).getInventory().addItem(instance.getPickaxe().getItem());
+                        else
+                           Bukkit.getConsoleSender().sendMessage(instance.translate("messages.no-permission.command.console"));
                     else
-                        p.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.give"));
+                        sender.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.give"));
                 } else if (args[0].equalsIgnoreCase("reload")){
-                    if (p.hasPermission("bedrockminer.reload")) {
+                    if (sender.hasPermission("bedrockminer.reload")) {
                         instance.reload();
-                        p.sendMessage(instance.getPrefix() + instance.translate("messages.reload"));
+                        sender.sendMessage(instance.getPrefix() + instance.translate("messages.reload"));
                     } else
-                        p.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.give"));
+                        sender.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.give"));
                 } else
-                    p.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.invalid"));
+                    sender.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.invalid"));
             } else if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("give")) {
-                    if (p.hasPermission("bedrockminer.give")) {
+                    if (sender.hasPermission("bedrockminer.give")) {
                         Player target = Bukkit.getPlayerExact(args[1]);
 
                         if (target == null)
-                            p.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.target-not-found"));
+                            sender.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.target-not-found"));
                         else
                             target.getInventory().addItem(instance.getPickaxe().getItem());
                     } else
-                        p.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.give"));
+                        sender.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.give"));
                 } else
-                    p.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.invalid"));
+                    sender.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.invalid"));
             } else {
-                p.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.to-many-args"));
+                sender.sendMessage(instance.getPrefix() + instance.translate("messages.no-permission.command.to-many-args"));
             }
             return true;
         }
         return false;
     }
+
 }
