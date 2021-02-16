@@ -93,3 +93,21 @@ allow-anvil-rename: false
 
 # Allow players to merge pickaxe with other pickaxes to try and sneak mending/etc on it, or to prevent repair
 allow-anvil-merge: false
+
+# Allow players put the bedrock pickaxe in a grindstone (Recommended to be left off)
+allow-grindstone: false
+
+# Plays sound when pickaxe is used in grindstone
+grindstone-play-sound: true
+
+# Allow players put the bedrock pickaxe in an enchanting table (Recommended to be left off)
+allow-enchanting-table: false
+
+# Plays sound when pickaxe is used in enchanting table
+enchanting-play-sound: true
+
+# Closes the player's inventory when pickaxe is used in enchanting table
+enchanting-close-inv: false
+
+# Strikes a fake lighting effect when pickaxe is used in enchanting table
+enchanting-strike-lighting: false
