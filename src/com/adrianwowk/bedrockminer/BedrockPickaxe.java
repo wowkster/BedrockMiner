@@ -138,7 +138,8 @@ public class BedrockPickaxe implements Listener {
             return;
 
         if (event.getBlock().getType() != Material.BEDROCK) {
-            player.sendMessage(instance.getPrefix() + instance.translate("messages.not-bedrock"));
+            if (!event.getBlock().isPassable())
+                player.sendMessage(instance.getPrefix() + instance.translate("messages.not-bedrock"));
             event.setCancelled(true);
         }
         else {
